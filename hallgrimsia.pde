@@ -8,8 +8,8 @@
 
 // Aki Asgeirsson january 2023
 
-//TODO, add swellwerk (chan 4, ctrl 7 ??)
-// PANIC for notes, PANIC for stops
+
+
 
 import themidibus.*;
 MidiBus myBus;
