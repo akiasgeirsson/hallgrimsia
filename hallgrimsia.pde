@@ -9,6 +9,8 @@
 // Aki Asgeirsson january 2023
 
 
+// test noteOFF + noteON(velocity 0)
+
 
 
 import themidibus.*;
@@ -33,7 +35,7 @@ int voicePanic = 11;
 int hardPanic = 22;
 
 void setup() {
-  size(1100, 700);
+  size(1280, 800);
   background(255);
   frameRate(20);
 
@@ -203,19 +205,19 @@ void keyPressed() {
       myBus.sendNoteOff(3, i, 0);
       myBus.sendNoteOff(4, i, 0);
 
-      delay(1); // ath  midibus thread.yield delay ??
+//      delay(1); // ath  midibus thread.yield delay ??
     }
   }
 }
 
 void noteOff(Note note) {
-  // Receive a noteOn
-  println();
-  println("Note Offfff:");
-  println("--------");
-  println("Channel:"+note.channel());
-  println("Pitch:"+note.pitch());
-  println("Velocity:"+note.velocity());
+  // Receive a noteOFF
+  //println();
+  //println("Note Offfff:");
+  //println("--------");
+  //println("Channel:"+note.channel());
+  //println("Pitch:"+note.pitch());
+  //println("Velocity:"+note.velocity());
 
 
   if (note.channel()==0) {
@@ -224,13 +226,11 @@ void noteOff(Note note) {
   //  }
   }
 
-
   if (note.channel()==1) {
     //if (note.velocity()==0) {
       kb2.keys[note.pitch()] = false;
     //}
   }
-
 
   if (note.channel()==2) {
     //if (note.velocity()==0) {
@@ -238,13 +238,11 @@ void noteOff(Note note) {
     //}
   }
 
-
   if (note.channel()==3) {
     //if (note.velocity()==0) {
       kb4.keys[note.pitch()] = false;
     //}
   }
-
 
   if (note.channel()==4) {
     //if (note.velocity()==0) {
@@ -253,15 +251,12 @@ void noteOff(Note note) {
   }
 
 
-
-
   // MIDI-through
   if (note.channel() == 0 && (note.pitch() >= 36 && note.pitch() <= 67) )   myBus.sendNoteOff(note);
   if (note.channel() == 1 && (note.pitch() >= 36 && note.pitch() <= 93) )   myBus.sendNoteOff(note);
   if (note.channel() == 2 && (note.pitch() >= 36 && note.pitch() <= 93) )   myBus.sendNoteOff(note);
   if (note.channel() == 3 && (note.pitch() >= 36 && note.pitch() <= 93) )   myBus.sendNoteOff(note);
   if (note.channel() == 4 && (note.pitch() >= 36 && note.pitch() <= 93) )   myBus.sendNoteOff(note);
-
 
 
 
@@ -277,12 +272,12 @@ void noteOff(Note note) {
 
 void noteOn(Note note) {
   // Receive a noteOn
-  println();
-  println("Note On:");
-  println("--------");
-  println("Channel:"+note.channel());
-  println("Pitch:"+note.pitch());
-  println("Velocity:"+note.velocity());
+  //println();
+  //println("Note On:");
+  //println("--------");
+  //println("Channel:"+note.channel());
+  //println("Pitch:"+note.pitch());
+  //println("Velocity:"+note.velocity());
 
 
   //write to array for keyboard display
@@ -294,7 +289,6 @@ void noteOn(Note note) {
     }
   }
 
-
   if (note.channel()==1) {
     if (note.velocity()==0) {
       kb2.keys[note.pitch()] = false;
@@ -302,7 +296,6 @@ void noteOn(Note note) {
       kb2.keys[note.pitch()] = true;
     }
   }
-
 
   if (note.channel()==2) {
     if (note.velocity()==0) {
@@ -312,7 +305,6 @@ void noteOn(Note note) {
     }
   }
 
-
   if (note.channel()==3) {
     if (note.velocity()==0) {
       kb4.keys[note.pitch()] = false;
@@ -320,7 +312,6 @@ void noteOn(Note note) {
       kb4.keys[note.pitch()] = true;
     }
   }
-
 
   if (note.channel()==4) {
     if (note.velocity()==0) {
@@ -339,6 +330,7 @@ void noteOn(Note note) {
   if (note.channel() == 4 && (note.pitch() >= 36 && note.pitch() <= 93) )   myBus.sendNoteOn(note);
 
 
+
   // forward chan 14 to speed damper 
   if (note.channel() == 13) {
     if (note.pitch() < 90) {
@@ -354,12 +346,12 @@ void noteOn(Note note) {
 
 void controllerChange(ControlChange change) {
   // Receive a controllerChange
-  println();
-  println("Controller Change:");
-  println("--------");
-  println("Channel:"+change.channel());
-  println("Number:"+change.number());
-  println("Value:"+change.value());
+  //println();
+  //println("Controller Change:");
+  //println("--------");
+  //println("Channel:"+change.channel());
+  //println("Number:"+change.number());
+  //println("Value:"+change.value());
 
   if (change.channel() == 3) {
     if (change.number() == 7) {  // ath zero based or not??
