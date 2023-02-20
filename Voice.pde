@@ -32,7 +32,7 @@ class Voice {
     offTime = 0;
     x = -111;
     y = -111;
-    s = 22;
+    s = 17;
   }
 
 
