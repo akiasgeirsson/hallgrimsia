@@ -5,6 +5,9 @@
 // Filter unneeded commands (record, playback, combinations etc)
 // MIDI-through for note range fitting with keyboards and stops
 // MIDI PANIC BUTTON
+//    I = voice panic (all registers off)
+//    O = slow panic for notes (gradually all notes off, chromatic upwards)
+//    P = hard panic for notes (send all notes off immediately)
 
 // Aki Asgeirsson january 2023
 
@@ -15,6 +18,11 @@
 
 import themidibus.*;
 MidiBus myBus;
+
+//import java.util.*;
+//Queue<String> queue = new LinkedList<>();
+
+StringList midiText;
 
 
 //  keyboard display
@@ -63,14 +71,14 @@ void setup() {
 
   for (int i=31; i<51; i++) {
     stop[i].pos(int((width/25.0)*(i-28)), int(height*0.48));
-  }  
+  }
 
   for (int i=51; i<67; i++) {
     stop[i].pos(int((width/21.0)*(i-48)), int(height*0.63));
-  }  
+  }
   for (int i=67; i<87; i++) {
     stop[i].pos(int((width/39.0)*(i-57)), int(height*0.78));
-  }  
+  }
 
   stop[87].pos(int((width/33.0)*27), int(height*0.85));
   stop[88].pos(int((width/33.0)*28), int(height*0.85));
@@ -78,13 +86,19 @@ void setup() {
 
 
   // objects for keyboard display
-  //int x_in, int y_in, int w_in, int h_in, int low_in, int high_in 
+  //int x_in, int y_in, int w_in, int h_in, int low_in, int high_in
 
   kb1 = new Keyboard(int(width*0.3), int(height*0.8), int(width*0.4), int(height*0.07), 36, 67);
   kb2 = new Keyboard(int(width*0.1), int(height*0.65), int(width*0.8), int(height*0.07), 36, 96);
   kb3 = new Keyboard(int(width*0.1), int(height*0.5), int(width*0.8), int(height*0.07), 36, 96);
   kb4 = new Keyboard(int(width*0.1), int(height*0.35), int(width*0.8), int(height*0.07), 36, 96);
   kb5 = new Keyboard(int(width*0.1), int(height*0.2), int(width*0.8), int(height*0.07), 36, 96);
+
+  midiText = new StringList();
+
+  for (int i=0; i<33; i++) {
+    midiText.append("MIDI Message  ----- " + "chan: " + int(random(128)) + " pitch: " + int(random(128)) + " velocity: " + int(random(128)) );
+  }
 }
 
 
@@ -92,8 +106,15 @@ void draw() {
   background(99, 55, 88);
   fill(188);
   textSize(16);
-  text("MIDI Traffic Controller for Hallgrimskirkja Klais Organ", width*0.1, height*0.08);
+  textAlign(LEFT);
+  text("hallgrimsia", width*0.1, height*0.08);
   text("aki asgeirsson, jan'23", width*0.1, height*0.11);
+
+
+  //display midi message text
+  //textSize(12);
+  textAlign(CENTER);
+  displayMidiText();
 
   // display keyboards
   kb1.display();
@@ -142,11 +163,11 @@ void draw() {
 
   //slow panic
   if (slowPanic<128) {
-    kb1.keys[slowPanic] = false; 
-    kb2.keys[slowPanic] = false; 
-    kb3.keys[slowPanic] = false; 
-    kb4.keys[slowPanic] = false; 
-    kb5.keys[slowPanic] = false; 
+    kb1.keys[slowPanic] = false;
+    kb2.keys[slowPanic] = false;
+    kb3.keys[slowPanic] = false;
+    kb4.keys[slowPanic] = false;
+    kb5.keys[slowPanic] = false;
     myBus.sendNoteOff(0, slowPanic, 0);
     myBus.sendNoteOff(1, slowPanic, 0);
     myBus.sendNoteOff(2, slowPanic, 0);
@@ -168,8 +189,23 @@ void draw() {
 }
 
 
+void toMidiText(String s) {
+  midiText.append(s);
+  midiText.remove(0);
+}
+
+void displayMidiText() {
+  for (int i=0; i<midiText.size(); i++) {
+    text(midiText.get(i), width*0.5, map(i, 0, 33, height*0.95, height*0.05));
+  }
+}
+
+
 void keyPressed() {
 
+
+ // String t = "takki test ~~~~~ " + "chan: " + 3 + " pitch: " + 33 + " velocity: " + random(1, 11) ;
+ // toMidiText(t);
 
   // voice panic
   if (key == 'i' || key == 'I') {
@@ -194,18 +230,18 @@ void keyPressed() {
     rect(width*0.875, height*0.1, width*0.01, height*0.05); // ath display
     rectMode(CORNER);
     for (int i = 0; i<128; i++) {
-      kb1.keys[i] = false; 
-      kb2.keys[i] = false; 
-      kb3.keys[i] = false; 
-      kb4.keys[i] = false; 
-      kb5.keys[i] = false; 
+      kb1.keys[i] = false;
+      kb2.keys[i] = false;
+      kb3.keys[i] = false;
+      kb4.keys[i] = false;
+      kb5.keys[i] = false;
       myBus.sendNoteOff(0, i, 0);
       myBus.sendNoteOff(1, i, 0);
       myBus.sendNoteOff(2, i, 0);
       myBus.sendNoteOff(3, i, 0);
       myBus.sendNoteOff(4, i, 0);
 
-//      delay(1); // ath  midibus thread.yield delay ??
+      //      delay(1); // ath  midibus thread.yield delay ??
     }
   }
 }
@@ -219,34 +255,36 @@ void noteOff(Note note) {
   //println("Pitch:"+note.pitch());
   //println("Velocity:"+note.velocity());
 
+  String t = "Note OFF  ----- " + "  channel: " + note.channel() + "   pitch: " + note.pitch() + "   velocity: " + note.velocity() ;
+  toMidiText(t);
 
   if (note.channel()==0) {
-  //  if (note.velocity()==0) {
-      kb1.keys[note.pitch()] = false;
-  //  }
+    //  if (note.velocity()==0) {
+    kb1.keys[note.pitch()] = false;
+    //  }
   }
 
   if (note.channel()==1) {
     //if (note.velocity()==0) {
-      kb2.keys[note.pitch()] = false;
+    kb2.keys[note.pitch()] = false;
     //}
   }
 
   if (note.channel()==2) {
     //if (note.velocity()==0) {
-      kb3.keys[note.pitch()] = false;
+    kb3.keys[note.pitch()] = false;
     //}
   }
 
   if (note.channel()==3) {
     //if (note.velocity()==0) {
-      kb4.keys[note.pitch()] = false;
+    kb4.keys[note.pitch()] = false;
     //}
   }
 
   if (note.channel()==4) {
     //if (note.velocity()==0) {
-      kb5.keys[note.pitch()] = false;
+    kb5.keys[note.pitch()] = false;
     //}
   }
 
@@ -260,10 +298,10 @@ void noteOff(Note note) {
 
 
 
-  // forward chan 14 to speed damper 
+  // forward chan 14 to speed damper
   if (note.channel() == 13) {
     if (note.pitch() < 90) {
-      //  if (note.velocity()==0) { 
+      //  if (note.velocity()==0) {
       stop[note.pitch()].off();
       // }
     }
@@ -279,10 +317,12 @@ void noteOn(Note note) {
   //println("Pitch:"+note.pitch());
   //println("Velocity:"+note.velocity());
 
+  String t = "Note ON  +++++  " + " chan: " + note.channel() + "   pitch: " + note.pitch() + "   velocity: " + note.velocity() ;
+  toMidiText(t);
 
   //write to array for keyboard display
   if (note.channel()==0) {
-    if (note.velocity()==0) {           // note ON with zero velocity (note off) 
+    if (note.velocity()==0) {           // note ON with zero velocity (note off)
       kb1.keys[note.pitch()] = false;
     } else {
       kb1.keys[note.pitch()] = true;    // note ON with any velocity
@@ -331,10 +371,10 @@ void noteOn(Note note) {
 
 
 
-  // forward chan 14 to speed damper 
+  // forward chan 14 to speed damper
   if (note.channel() == 13) {
     if (note.pitch() < 90) {
-      if (note.velocity()==0) { 
+      if (note.velocity()==0) {
         stop[note.pitch()].off();
       } else {
         stop[note.pitch()].on();
@@ -352,6 +392,9 @@ void controllerChange(ControlChange change) {
   //println("Channel:"+change.channel());
   //println("Number:"+change.number());
   //println("Value:"+change.value());
+
+  String t = "Control Change ~~~~~  " + " chan: " + change.channel() + "   nr: " + change.number() + "   value: " + change.value() ;
+  toMidiText(t);
 
   if (change.channel() == 3) {
     if (change.number() == 7) {  // ath zero based or not??
