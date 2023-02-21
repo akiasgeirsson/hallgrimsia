@@ -97,7 +97,7 @@ void setup() {
   midiText = new StringList();
 
   for (int i=0; i<33; i++) {
-    midiText.append("MIDI Message  ----- " + "chan: " + int(random(128)) + " pitch: " + int(random(128)) + " velocity: " + int(random(128)) );
+    midiText.append("MIDI Message  -----  " + " chan: " + int(random(128)) + "   pitch: " + int(random(128)) + "   velocity: " + int(random(128)) );
   }
 }
 
@@ -203,9 +203,6 @@ void displayMidiText() {
 
 void keyPressed() {
 
-
- // String t = "takki test ~~~~~ " + "chan: " + 3 + " pitch: " + 33 + " velocity: " + random(1, 11) ;
- // toMidiText(t);
 
   // voice panic
   if (key == 'i' || key == 'I') {
